@@ -25,7 +25,6 @@ def make_grid_Q4(c1x, c1y, c2x, c2y, nx, ny, elm):
     :return: Connectivity matrix, X-coordinates of nodes, Y-Coordinates of nodes
     """
 
-    n_decimals = 2
 
     elmwidth = float(c2x - c1x) / float(nx)
     elmheigt = float(c2y - c1y) / float(ny)
@@ -33,26 +32,19 @@ def make_grid_Q4(c1x, c1y, c2x, c2y, nx, ny, elm):
     xnodes = elm.nodal_xpos * elmwidth
     ynodes = elm.nodal_ypos * elmheigt
 
-    elements = []
-    nodes = set()
+    ynode = []
+    xnode = []
 
     for i in range(ny):
         for j in range(nx):
-            elements.append(zip(np.around(ynodes[:] + elmheigt * i,n_decimals), np.around(xnodes[:] + elmwidth * j,n_decimals)))
-            nodes.update(zip(np.around(ynodes[:] + elmheigt * i,n_decimals), np.around(xnodes[:] + elmwidth * j,n_decimals)))
+            ynode.append(ynodes[:] + elmheigt * i + c1y)
+            xnode.append(xnodes[:] + elmwidth * j + c1x)
 
-    nodes = sorted(list(nodes))
-
-    con_matrix = []
-
-    for e in range(nx * ny):
-        con_matrix.append(list(map(nodes.index, list(elements[e]))))
-
-    ynod, xnod = zip(*nodes)
-    ynode = np.array(ynod) + c1y
-    xnode = np.array(xnod) + c1x
-
-    return np.array(con_matrix).transpose(), xnode, ynode
+    ynode = np.array(ynode).flatten()
+    xnode = np.array(xnode).flatten()
+    con_matrix = np.arange(len(ynode)).reshape((-1,4)).transpose()
+    
+    return con_matrix, xnode, ynode
 
 
 def make_grid(c1x, c1y, c2x, c2y, ny, nx, elm):
