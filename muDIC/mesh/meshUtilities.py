@@ -9,6 +9,41 @@ from ..IO.image_stack import ImageStack
 from ..elements.b_splines import BSplineSurface
 from ..elements.q4 import Q4
 
+def make_grid_subset(c1x, c1y, c2x, c2y, nx, ny, elm):
+    # type: (float, float, float, float, int, int, instance) -> object
+    """
+    Makes regular grid for the given corned coordinates, number of elements along each axis and finite element definitions
+    :rtype: np.array,np.array,np.array
+    :param c1x: X-position of upper left corner
+    :param c1y: Y-position of upper left corner
+    :param c2x: X-position of lower right corner
+    :param c2y: Y-position of lower right corner
+    :param nx:  Number of elements along X-axis
+    :param ny:  Number of elements along Y-axis
+    :param elm: Finite element instance
+    :return: Connectivity matrix, X-coordinates of nodes, Y-Coordinates of nodes
+    """
+
+
+    elmwidth = float(c2x - c1x) / float(nx)
+    elmheigt = float(c2y - c1y) / float(ny)
+
+    xnodes = elm.nodal_xpos * elmwidth
+    ynodes = elm.nodal_ypos * elmheigt
+
+    ynode = []
+    xnode = []
+
+    for i in range(ny):
+        for j in range(nx):
+            ynode.append(ynodes[:] + elmheigt * i + c1y)
+            xnode.append(xnodes[:] + elmwidth * j + c1x)
+
+    ynode = np.array(ynode).flatten()
+    xnode = np.array(xnode).flatten()
+    con_matrix = np.arange(len(ynode)).reshape((-1,4)).transpose()
+    
+    return con_matrix, xnode, ynode
 
 def make_grid_Q4(c1x, c1y, c2x, c2y, nx, ny, elm):
     # type: (float, float, float, float, int, int, instance) -> object
@@ -103,7 +138,7 @@ def make_grid(c1x, c1y, c2x, c2y, ny, nx, elm):
 
 
 class Mesher(object):
-    def __init__(self, deg_e=1, deg_n=1, type="q4"):
+    def __init__(self, deg_e=1, deg_n=1, **kwargs):
 
         """
         Mesher utility
@@ -126,7 +161,7 @@ class Mesher(object):
 
         self.deg_e = deg_e
         self.deg_n = deg_n
-        self.type = type
+        self.type = kwargs.get('type')
 
     def __gui__(self):
         from matplotlib.widgets import Button, RectangleSelector
@@ -251,6 +286,9 @@ class Mesher(object):
 
             element = BSplineSurface(self.deg_e, self.deg_n, **kwargs)
 
+        elif self.type == "subset":
+            element = Q4()
+
         else:
             element = Q4()
 
@@ -313,11 +351,16 @@ class Mesh(object):
         logger = logging.getLogger(__name__)
         try:
             if isinstance(self.element_def, Q4):
-                logger.info("Using Q4 elements")
-                self.ele, self.xnodes, self.ynodes = make_grid_Q4(self.Xc1, self.Yc1, self.Xc2, self.Yc2,
-                                                                  self.n_elx,
-                                                                  self.n_ely, self.element_def)
-
+                if type == 'subset':
+                    logger.info("Using subset elements")
+                    self.ele, self.xnodes, self.ynodes = make_grid_subset(self.Xc1, self.Yc1, self.Xc2, self.Yc2,
+                                                                       self.n_elx,
+                                                                       self.n_ely, self.element_def)
+                else :
+                    logger.info("Using Q4 elements")
+                    self.ele, self.xnodes, self.ynodes = make_grid_Q4(self.Xc1, self.Yc1, self.Xc2, self.Yc2,
+                                                                       self.n_elx,
+                                                                       self.n_ely, self.element_def)
                 logger.info('Element contains %.1f X %.1f pixels and is divided in %i X %i ' % (
                     (self.Xc2 - self.Xc1) / self.n_elx, (self.Yc2 - self.Yc1) / self.n_ely, self.n_elx, self.n_ely))
 
