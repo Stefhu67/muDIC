@@ -1,10 +1,10 @@
-import logging
+import logging, os
 
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.ndimage import map_coordinates
 from muDIC.elements.b_splines import BSplineSurface
-from muDIC.elements.q4 import Q4
+from muDIC.elements.q4 import Q4, Subsets
 
 
 class Fields(object):
@@ -47,6 +47,11 @@ class Fields(object):
             q4 = True
             seed = 1
             self.logger.info("Post processing results from Q4 elements. The seed variable is ignored and the values "
+                             "are extracted at the element centers. Use the upscale value to get interpolated fields.")
+        elif isinstance(self.__settings__.mesh.element_def, Subsets):
+            q4 = True
+            seed = 1
+            self.logger.info("Post processing results from Subsets elements. The seed variable is ignored and the values "
                              "are extracted at the element centers. Use the upscale value to get interpolated fields.")
         else:
             q4 = False
@@ -362,7 +367,7 @@ class Visualizer(object):
         self.images = images
         self.logger = logging.getLogger()
 
-    def show(self, field="displacement", component=(0, 0), frame=0, quiverdisp=False, **kwargs):
+    def show(self, field="displacement", component=(0, 0), frame=0, quiverdisp=False, save_path=None, title=None, **kwargs):
         """
         Show the field variable
 
@@ -381,7 +386,9 @@ class Visualizer(object):
             In the case of vector fields, only the first index is used.
         frame : Integer
             The frame number of the field
-
+        save : string
+            If a path is specified, the plot will be saved to that path, it will not be shown.
+            If None is specified, the plot will be shown only.
         """
 
         keyword = field.replace(" ", "").lower()
@@ -428,10 +435,27 @@ class Visualizer(object):
                 plt.quiver(self.fields.coords()[0, 0, :, :, frame], self.fields.coords()[0, 1, :, :, frame],
                            self.fields.disp()[0, 0, :, :, frame], self.fields.disp()[0, 1, :, :, frame],**kwargs)
             else:
-                plt.contourf(xs, ys, fvar, 50, **kwargs)
-                plt.colorbar()
-        plt.show()
+                im = plt.contourf(xs, ys, fvar, **kwargs)
+                m = plt.cm.ScalarMappable(cmap=im.get_cmap())
+                m.set_array(fvar)
+                m.set_clim(*im.get_clim())
+                cbar = plt.colorbar(m)
+        if 'vmax' in kwargs or 'vmin' in kwargs :
+            print("The colorbar has been cropped")
+        else :
+            print("The colorbar has been established automatically")
 
+        plt.title(title,loc='center')
+        if save_path is None:
+            plt.show()
+        else:
+            if not os.path.exists(os.path.dirname(save_path)):
+                os.makedirs(os.path.dirname(save_path))
+                plt.savefig(save_path)
+                plt.close()
+            else:
+                plt.savefig(save_path)
+                plt.close()
 
 def ind_closest_below(value, list):
     ind = 0
