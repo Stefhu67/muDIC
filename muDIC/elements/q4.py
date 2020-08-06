@@ -99,3 +99,16 @@ class Q4(Finite_Element):
         self.n_nodes = 4
         self.corner_nodes = np.array([0, 1, 2, 3])
         Finite_Element.__init__(self, 1)
+
+class Subsets(Finite_Element):
+    def __init__(self):
+        """
+        Quadratic 4-noded Finite Element
+        Uses bi-linear interpolation polynomials
+        """
+        self.nodal_xpos = np.array([0., 1., 1., 0.], dtype=np.float64)
+
+        self.nodal_ypos = np.array([0., 0., 1., 1.], dtype=np.float64)
+        self.n_nodes = 4
+        self.corner_nodes = np.array([0, 1, 2, 3])
+        Finite_Element.__init__(self, 1)

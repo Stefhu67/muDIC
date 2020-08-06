@@ -1,10 +1,10 @@
-import logging
+import logging, os
 
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.ndimage import map_coordinates
 from muDIC.elements.b_splines import BSplineSurface
-from muDIC.elements.q4 import Q4
+from muDIC.elements.q4 import Q4, Subsets
 
 
 class Fields(object):
@@ -47,6 +47,11 @@ class Fields(object):
             q4 = True
             seed = 1
             self.logger.info("Post processing results from Q4 elements. The seed variable is ignored and the values "
+                             "are extracted at the element centers. Use the upscale value to get interpolated fields.")
+        elif isinstance(self.__settings__.mesh.element_def, Subsets):
+            q4 = True
+            seed = 1
+            self.logger.info("Post processing results from Subsets elements. The seed variable is ignored and the values "
                              "are extracted at the element centers. Use the upscale value to get interpolated fields.")
         else:
             q4 = False
@@ -362,7 +367,7 @@ class Visualizer(object):
         self.images = images
         self.logger = logging.getLogger()
 
-    def show(self, field="displacement", component=(0, 0), frame=0, title=None, quiverdisp=False, **kwargs):
+    def show(self, field="displacement", component=(0, 0), frame=0, quiverdisp=False, save_path=None, title=None, **kwargs):
         """
         Show the field variable
 
@@ -381,7 +386,9 @@ class Visualizer(object):
             In the case of vector fields, only the first index is used.
         frame : Integer
             The frame number of the field
-
+        save : string
+            If a path is specified, the plot will be saved to that path, it will not be shown.
+            If None is specified, the plot will be shown only.
         """
 
         keyword = field.replace(" ", "").lower()
@@ -434,7 +441,7 @@ class Visualizer(object):
                 m.set_clim(*im.get_clim())
                 cbar = plt.colorbar(m)
         if 'vmax' in kwargs or 'vmin' in kwargs :
-           print("The colorbar has been cropped")
+            print("The colorbar has been cropped")
         else :
             print("The colorbar has been established automatically")
 
@@ -449,7 +456,6 @@ class Visualizer(object):
             else:
                 plt.savefig(save_path)
                 plt.close()
-
 
 def ind_closest_below(value, list):
     ind = 0
