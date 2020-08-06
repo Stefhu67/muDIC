@@ -362,7 +362,7 @@ class Visualizer(object):
         self.images = images
         self.logger = logging.getLogger()
 
-    def show(self, field="displacement", component=(0, 0), frame=0, quiverdisp=False, **kwargs):
+    def show(self, field="displacement", component=(0, 0), frame=0, title=None, quiverdisp=False, **kwargs):
         """
         Show the field variable
 
@@ -428,9 +428,27 @@ class Visualizer(object):
                 plt.quiver(self.fields.coords()[0, 0, :, :, frame], self.fields.coords()[0, 1, :, :, frame],
                            self.fields.disp()[0, 0, :, :, frame], self.fields.disp()[0, 1, :, :, frame],**kwargs)
             else:
-                plt.contourf(xs, ys, fvar, 50, **kwargs)
-                plt.colorbar()
-        plt.show()
+                im = plt.contourf(xs, ys, fvar, **kwargs)
+                m = plt.cm.ScalarMappable(cmap=im.get_cmap())
+                m.set_array(fvar)
+                m.set_clim(*im.get_clim())
+                cbar = plt.colorbar(m)
+        if 'vmax' in kwargs or 'vmin' in kwargs :
+           print("The colorbar has been cropped")
+        else :
+            print("The colorbar has been established automatically")
+
+        plt.title(title,loc='center')
+        if save_path is None:
+            plt.show()
+        else:
+            if not os.path.exists(os.path.dirname(save_path)):
+                os.makedirs(os.path.dirname(save_path))
+                plt.savefig(save_path)
+                plt.close()
+            else:
+                plt.savefig(save_path)
+                plt.close()
 
 
 def ind_closest_below(value, list):
