@@ -445,7 +445,10 @@ class Visualizer(object):
         else :
             print("The colorbar has been established automatically")
 
-        plt.title(title,loc='center')
+        if title is None :
+            title='Plot of the ' + field + ' along the ' + str(component) + ' direction for frame number ' + str(frame)   
+        plt.title(title,loc='center')        
+        
         if save_path is None:
             plt.show()
         else:
