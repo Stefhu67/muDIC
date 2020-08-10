@@ -49,6 +49,9 @@ fields = dic.post.viz.Fields(dic_results,upscale=10)
 # Show a field
 viz = dic.Visualizer(fields,images=images)
 
+# Follow a node during the experiment 
+viz.save_nodes(node=39, field="displacement", component = (1,1))
+
 # Uncomment the line below to see the results
 # viz.show(field="displacement", component = (1,1), frame=-1)
 
