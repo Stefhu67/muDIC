@@ -460,7 +460,7 @@ class Visualizer(object):
                 plt.savefig(save_path)
                 plt.close()
 
-def save_nodes(self, node=1, field="displacement", component=(0, 0), quiverdisp=False, **kwargs):
+    def save_nodes(self, node=1, field="displacement", component=(0, 0), quiverdisp=False, **kwargs):
         """
         Show the field variable
 
