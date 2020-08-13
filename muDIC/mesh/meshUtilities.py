@@ -4,6 +4,7 @@ import logging
 from copy import copy
 
 import numpy as np
+import matplotlib.pyplot as plt
 
 from ..IO.image_stack import ImageStack
 from ..elements.b_splines import BSplineSurface
@@ -54,41 +55,38 @@ def make_grid_Q4(c1x, c1y, c2x, c2y, nx, ny, elm):
 
     return np.array(con_matrix).transpose(), xnode, ynode
 
-def make_grid_subset(c1x, c1y, c2x, c2y, nx, ny, elm):
-    # type: (float, float, float, float, int, int, instance) -> object
+def make_unstructured_subset(elm_centers,elm_sizes,elm):
     """
-    Makes regular grid for the given corned coordinates, number of elements along each axis and finite element definitions
     :rtype: np.array,np.array,np.array
-    :param c1x: X-position of upper left corner
-    :param c1y: Y-position of upper left corner
-    :param c2x: X-position of lower right corner
-    :param c2y: Y-position of lower right corner
-    :param nx:  Number of elements along X-axis
-    :param ny:  Number of elements along Y-axis
-    :param elm: Finite element instance
+    :param elm_centers: List of tuples with the center position of all elements
+    :param elm_sizes: List of tuples with the width and height of all elements
+    :param elm: Finite element instance    
     :return: Connectivity matrix, X-coordinates of nodes, Y-Coordinates of nodes
     """
 
+    # Check that the input makes sense
+    if len(elm_centers) != len(elm_sizes):
+        raise IOError("The lists of elements centers and elements sizes has to be the same size")
 
-    elmwidth = float(c2x - c1x) / float(nx)
-    elmheigt = float(c2y - c1y) / float(ny)
+    xnodes = []
+    ynodes = []
 
-    xnodes = elm.nodal_xpos * elmwidth
-    ynodes = elm.nodal_ypos * elmheigt
+    for elm_nr, elm_center in enumerate(elm_centers):
+        elm_center_x, elm_center_y = elm_center
+        elmwidth,elmheigt = elm_sizes[elm_nr]
 
-    ynode = []
-    xnode = []
+        elm_x_nodes = elm.nodal_xpos * elmwidth
+        elm_y_nodes = elm.nodal_ypos * elmheigt
 
-    for i in range(ny):
-        for j in range(nx):
-            ynode.append(ynodes[:] + elmheigt * i + c1y)
-            xnode.append(xnodes[:] + elmwidth * j + c1x)
+        xnodes.append(elm_x_nodes - elmwidth/2. + elm_center_x)
+        ynodes.append(elm_y_nodes - elmheigt/2. + elm_center_y)
 
-    ynode = np.array(ynode).flatten()
-    xnode = np.array(xnode).flatten()
-    con_matrix = np.arange(len(ynode)).reshape((-1,4)).transpose()
+
+    ynodes = np.array(ynodes).flatten()
+    xnodes = np.array(xnodes).flatten()
+    con_matrix = np.arange(len(ynodes)).reshape((-1,4)).transpose()
     
-    return con_matrix, xnode, ynode
+    return con_matrix, xnodes, ynodes
 
 def make_grid(c1x, c1y, c2x, c2y, ny, nx, elm):
     """
@@ -370,10 +368,15 @@ class Mesh(object):
                 self.n_nodes = len(self.xnodes)
                 self.n_elms = self.n_elx * self.n_ely
             elif isinstance(self.element_def, Subsets):
+                Elm_centers = []
+                step_x = (self.Xc2-self.Xc1)/self.n_elx
+                step_y = (self.Yc2-self.Yc1)/self.n_ely
+                for i in range (self.n_elx):
+                    for j in range (self.n_ely):
+                        Elm_centers.append(np.around((self.Xc1+(step_x/2)+step_x*i, self.Yc1+(step_y/2)+step_y*j)))
+                Elm_sizes = [(step_x,step_y) for i in range (len(Elm_centers))]
                 logger.info("Using Subsets elements")
-                self.ele, self.xnodes, self.ynodes = make_grid_subset(self.Xc1, self.Yc1, self.Xc2, self.Yc2,
-                                                                  self.n_elx,
-                                                                  self.n_ely, self.element_def)
+                self.ele, self.xnodes, self.ynodes = make_unstructured_subset(Elm_centers,Elm_sizes,Q4()
 
                 logger.info('Element contains %.1f X %.1f pixels and is divided in %i X %i ' % (
                     (self.Xc2 - self.Xc1) / self.n_elx, (self.Yc2 - self.Yc1) / self.n_ely, self.n_elx, self.n_ely))
