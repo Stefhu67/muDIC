@@ -342,6 +342,19 @@ class Fields(object):
         ref = self.__res__.reference[ref_id]
         return ref.e, ref.n
 
+    def get(self, field_name):
+        if field_name=="truestrain":
+            return self.true_strain()
+        elif field_name=="displacement":
+            return self.disp()
+        elif field_name=="F":
+            return self.F()
+        elif field_name=="engstrain":
+            return self.eng_strain()
+        elif field_name=="coordinates":
+            return self.coords()
+        else :
+            return self.green_strain()
 
 class Visualizer(object):
     def __init__(self, fields, images=False):
@@ -460,76 +473,16 @@ class Visualizer(object):
                 plt.savefig(save_path)
                 plt.close()
 
-    def save_nodes(self, node=1, field="displacement", component=(0, 0), quiverdisp=False, **kwargs):
+    def element_history(self, node=1, field="displacement", component=(0, 0), quiverdisp=False, **kwargs):
         """
-        Show the field variable
-
-        Parameters
-        ----------
-        field : string
-            The name of the field to be shown. Valid inputs are:
-                "true strain"
-                "eng strain"
-                "disp"
-                "green strain"
-                "residual"
-
-        component : tuple with length 2
-            The components of the fields. Ex. (0,1).
-            In the case of vector fields, only the first index is used.
-        
-        node : integer 
-            Number of observed node
+        Choose the row and the column to target the element that you want to follow during the experiment.
         """
-
-        keyword = field.replace(" ", "").lower()
-        fvar_node=[]
-        for i in range (len(self.images)):
-            frame = i 
-            if keyword == "truestrain":
-                fvar = self.fields.true_strain()[0, component[0], component[1], :, :, frame]
-                xs, ys = self.fields.coords()[0, 0, :, :, frame], self.fields.coords()[0, 1, :, :, frame]
-
-            elif keyword in ("F", "degrad", "deformationgradient"):
-                fvar = self.fields.F()[0, component[0], component[1], :, :, frame]
-                xs, ys = self.fields.coords()[0, 0, :, :, frame], self.fields.coords()[0, 1, :, :, frame]
-
-            elif keyword == "engstrain":
-                fvar = self.fields.eng_strain()[0, component[0], component[1], :, :, frame]
-                xs, ys = self.fields.coords()[0, 0, :, :, frame], self.fields.coords()[0, 1, :, :, frame]
-
-            elif keyword in ("displacement", "disp", "u"):
-                fvar = self.fields.disp()[0, component[0], :, :, frame]
-                xs, ys = self.fields.coords()[0, 0, :, :, frame], self.fields.coords()[0, 1, :, :, frame]
-
-            elif keyword in ("coordinates", "coords", "coord"):
-                fvar = self.fields.coords()[0, component[0], :, :, frame]
-                xs, ys = self.fields.coords()[0, 0, :, :, frame], self.fields.coords()[0, 1, :, :, frame]
-
-
-            elif keyword == "greenstrain":
-                fvar = self.fields.green_strain()[0, component[0], component[1], :, :, frame]
-                xs, ys = self.fields.coords()[0, 0, :, :, frame], self.fields.coords()[0, 1, :, :, frame]
-
-            elif keyword == "residual":
-                fvar = self.fields.residual(frame)
-                xs, ys = self.fields.elm_coords(frame)
-
-            else:
-                self.logger.info("No valid field name was specified")
-                return
-            
-            quotient=node//(len(xs[0]))
-            rest=node%(len(xs[0]))
-            if rest==0:
-                fvar_node.append(abs(fvar[quotient-1][-1]))
-            else:
-                fvar_node.append(abs(fvar[quotient][rest-1]))
-        image_number=list(range(len(self.images)))
-        plt.plot(image_number,fvar_node,"b:o", label= field + ' - node ' + str(node))
+        if field == "displacement" or field == "coordinates":
+            plt.plot(list(range(len(self.images))),self.fields.get(field)[0,component[0],row,column,:])
+        else :
+            plt.plot(list(range(len(self.images))),self.fields.get(field)[0,component[0],component[1],row,column,:])
         plt.xlabel("Images")
         plt.ylabel(field)
-        plt.title(field + ' along the ' + str(component) + ' direction'+ ' for the node number ' + str(node))
         plt.legend()
         plt.show()
 
