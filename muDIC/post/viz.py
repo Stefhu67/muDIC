@@ -473,7 +473,7 @@ class Visualizer(object):
                 plt.savefig(save_path)
                 plt.close()
 
-    def element_history(self, node=1, field="displacement", component=(0, 0), quiverdisp=False, **kwargs):
+    def element_history(self, row=1, column=1,  field="displacement", component=(0, 0), quiverdisp=False, **kwargs):
         """
         Choose the row and the column to target the element that you want to follow during the experiment.
         """
