@@ -53,7 +53,7 @@ fields = dic.post.viz.Fields(dic_results,upscale=10)
 viz = dic.Visualizer(fields,images=images)
 
 # Follow an element during the experiment 
-viz.element_history(field="displacement", row=1, column=3, component = (1,1))
+viz.element_history(field="displacement", row=1, column=3, nbr_img=settings.max_nr_im, component = (1,1))
 
 # Uncomment the line below to see the results
 # viz.show(field="displacement", component = (1,1), frame=-1)
