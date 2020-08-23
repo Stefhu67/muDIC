@@ -398,6 +398,13 @@ class Mesh(object):
         except Exception as e:
             logger.exception("Mesh generation failed")
 
+    def visualize_node(self):
+        import matplotlib.pyplot as plt
+        plt.plot(self.xnodes,self.ynodes,"o")
+        for i in range (len(self.ynodes)):
+            plt.text(self.xnodes[i], self.ynodes[i], str(i+1))
+        plt.show()
+
     def scale_mesh_y(self, factor):
         """
         Scale mesh in the y direction by a factor

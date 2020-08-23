@@ -342,6 +342,19 @@ class Fields(object):
         ref = self.__res__.reference[ref_id]
         return ref.e, ref.n
 
+    def get(self, field_name):
+        if field_name=="truestrain":
+            return self.true_strain()
+        elif field_name=="displacement":
+            return self.disp()
+        elif field_name=="F":
+            return self.F()
+        elif field_name=="engstrain":
+            return self.eng_strain()
+        elif field_name=="coordinates":
+            return self.coords()
+        else :
+            return self.green_strain()
 
 class Visualizer(object):
     def __init__(self, fields, images=False):
@@ -459,6 +472,19 @@ class Visualizer(object):
             else:
                 plt.savefig(save_path)
                 plt.close()
+
+    def element_history(self, row=1, column=1,  field="displacement", component=(0, 0), quiverdisp=False, **kwargs):
+        """
+        Choose the row and the column to target the element that you want to follow during the experiment.
+        """
+        nbr_img=kwargs.get('nbr_img')
+        if field == "displacement" or field == "coordinates":
+            plt.plot(list(range(nbr_img)),self.fields.get(field)[0,component[0],row,column,:])
+        else :
+            plt.plot(list(range(nbr_img)),self.fields.get(field)[0,component[0],component[1],row,column,:])
+        plt.xlabel("Images")
+        plt.ylabel(field)
+        plt.show()
 
 def ind_closest_below(value, list):
     ind = 0
