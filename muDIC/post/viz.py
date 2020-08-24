@@ -479,11 +479,13 @@ class Visualizer(object):
         """
         nbr_img=kwargs.get('nbr_img')
         if field == "displacement" or field == "coordinates":
-            plt.plot(list(range(nbr_img)),self.fields.get(field)[0,component[0],row,column,:])
+            plt.plot(list(range(nbr_img)),self.fields.get(field)[0,component[0],row,column,:], "b:o", label=field + ' - row ' + str(row) + ' - column ' + str(column))
         else :
-            plt.plot(list(range(nbr_img)),self.fields.get(field)[0,component[0],component[1],row,column,:])
+            plt.plot(list(range(nbr_img)),self.fields.get(field)[0,component[0],component[1],row,column,:], "b:o", label=field + ' - row ' + str(row) + ' - column ' + str(column))
         plt.xlabel("Images")
         plt.ylabel(field)
+        plt.title('Observation of the element in row ' + str(row) + ' and column ' + str(column) + ' in the direction ' + str(component) + ' for the ' + field)
+        plt.legend()
         plt.show()
 
 def ind_closest_below(value, list):
