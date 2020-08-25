@@ -399,11 +399,18 @@ class Mesh(object):
             logger.exception("Mesh generation failed")
 
     def visualize_node(self):
-        import matplotlib.pyplot as plt
-        plt.plot(self.xnodes,self.ynodes,"o")
+        from PIL import ImageFont, Image, ImageDraw
+
+        im = Image.open(r'./example_data/ut_151.tif')
+
+        font = ImageFont.truetype("/Library/Fonts/Times New Roman.ttf", 40)
+
+        draw = ImageDraw.Draw(im)
+        height = im.size[1]
         for i in range (len(self.ynodes)):
-            plt.text(self.xnodes[i], self.ynodes[i], str(i+1))
-        plt.show()
+            draw.text((self.xnodes[i], height-self.ynodes[i]),str(i+1),(255,0,0),font=font)
+        im.show()
+        
 
     def scale_mesh_y(self, factor):
         """
