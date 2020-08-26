@@ -19,6 +19,9 @@ This toolkit includes the following:
     * Image deformation tools
     * Noise injection
     * Image down-sampling
+* Subset finite elements
+    * Elements are independent
+    * Elements can overlap during the experiment 
 * B-spline finite elements
     * Arbitrary polynomial order
     * Knot vectors can be manipulated
