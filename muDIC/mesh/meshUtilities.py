@@ -400,11 +400,10 @@ class Mesh(object):
 
     def visualize_node(self):
         from PIL import ImageFont, Image, ImageDraw
-
-        im = Image.open(r'./example_data/ut_151.tif')
-
-        font = ImageFont.truetype("/Library/Fonts/Times New Roman.ttf", 40)
-
+        import glob
+        ImStack=glob.glob(r'./example_data/*')
+        im = Image.open(ImStack[0])
+        font = ImageFont.load_default()
         draw = ImageDraw.Draw(im)
         height = im.size[1]
         for i in range (len(self.ynodes)):
