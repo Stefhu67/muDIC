@@ -13,11 +13,11 @@ logging.basicConfig(format='%(name)s:%(levelname)s:%(message)s', level=logging.I
 
 path_l = glob.glob(r'./Image_test_L/*')
 path_r = glob.glob(r'./Image_test_R/*')
-#path_l=glob.glob(r'./frame45_0.png')
-#path_r=glob.glob(r'./frame45_1.png')
+
 calib_path_l = glob.glob(r'./Image_calib_L/*')
 calib_path_r = glob.glob(r'./Image_calib_R/*')
 Calibration.crop(imageStack=path_l, calib_path=calib_path_l, side='L')
+# We assume that the calibration required here is the same for the 2 cameras (if they are the same), so calib_path=calib_path_l again
 Calibration.crop(imageStack=path_r, calib_path=calib_path_l, side='R')
 
 # We are going to work with the path which containing all the cropted images 
